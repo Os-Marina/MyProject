@@ -8,13 +8,12 @@
         <v-btn variant="outlined">Done</v-btn>
       </div>
       <div :style="{color: count % 2 === 0 ? 'red' : ' green'}">{{ count }}</div>
-      <div>
-        <v-btn
-          variant="outlined"
-          @click="addCount"
-        >+
-        </v-btn>
-      </div>
+      <v-btn
+        variant="outlined"
+        @click="addCount"
+      >+
+      </v-btn>
+      <v-text-field v-model="taskTitle" class="inp-text" placeholder="Введите заметку..."></v-text-field>
     </div>
   </v-app>
 </template>
@@ -22,9 +21,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+type Task = {title: string}
+
+const taskTitle = ref('')
+const tasks = ref([] as Task [])
 
 let count = ref(0)
 function addCount(){
+  tasks.value.push({title: taskTitle.value})
   count.value += 1
   console.log(count.value);
 }
@@ -49,5 +53,8 @@ function addCount(){
   display: flex;
   flex-direction: row;
   gap: 30px;
+}
+.inp-text{
+  width: 250px;
 }
 </style>
