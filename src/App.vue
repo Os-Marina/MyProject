@@ -16,75 +16,23 @@
           variant="outlined"
         />
       </div>
-      <div>
-        <div class="card">
-          <v-card-text
-            v-for="task in filteredTasks"
-            :key="task.id"
-            class="card__items"
-          >
-            <div class="card__text" :class="[{ completeTask: task.complete }]">
-              {{ task.title }}
-            </div>
-            <div class="card__btns">
-              <v-btn
-                icon="mdi-pencil-outline"
-                @click="editTask(task)"
-                class="card__btn"
-                style="color: blue"
-              >
-              </v-btn>
-              <v-btn
-                icon="mdi-check"
-                class="card__btn"
-                style="color: green"
-                @click="toggleTask(task.id)"
-              >
-              </v-btn>
-              <v-btn
-                icon="mdi-trash-can"
-                class="card__btn"
-                style="color: red"
-                @click="removeTask(task.id)"
-              >
-              </v-btn>
-            </div>
-          </v-card-text>
-        </div>
-      </div>
-      <v-dialog v-model="isDialog" max-width="500">
-        <v-card class="item-list" style="display: flex; flex-direction: row">
-          <v-form class="item-list__task">
-            <v-toolbar-title style="margin-bottom: 15px; font-weight: 300">{{
-              isEditTask ? "Редактирование задачи" : "Добавление задачи"
-            }}</v-toolbar-title>
-            <v-text-field
-              autofocus
-              v-model="taskTitle"
-              class="item-list__text"
-              :rules="[isRequired]"
-              label="Введите заметку..."
-            />
-            <v-btn variant="outlined" @click="saveTask" class="item-list__btn"
-              >Сохранить заметку
-            </v-btn>
-          </v-form>
-          <v-btn
-            icon="mdi-close"
-            @click="closeForm"
-            class="item-list__btn-close"
-          />
-        </v-card>
-      </v-dialog>
+      <TodoList
+        :tasks="tasks"
+        :filterType="filterType"
+        @editTask="editTask"
+        @toggleTask="toggleTask"
+        @removeTask="removeTask"
+      />
+      <MyDialog v-model="isDialog" />
     </div>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import { isRequired } from "./helpers/rules";
-import { ref, computed, onMounted } from "vue";
-import { VTextField } from "vuetify/components";
-
+// import { isRequired } from "./helpers/rules";
+import { ref, onMounted, provide } from "vue";
+import TodoList from "./components/list/TodoList.vue";
+import MyDialog from "./components/dialog/MyDialog.vue";
 import type { Task } from "@/type";
 
 let id = 0;
@@ -120,7 +68,6 @@ function editTask(task) {
   isEditTask.value = true;
   isDialog.value = true;
 }
-
 function saveTask() {
   if (taskTitle.value) {
     if (isEditTask.value && currenTaskId.value !== null) {
@@ -152,18 +99,14 @@ function removeTask(taskId: number) {
   tasks.value = tasks.value.filter((task) => task.id !== taskId);
   localStorage.setItem("tasks", JSON.stringify(tasks.value));
 }
-
 function setFilterCompleted(type: "active" | "done") {
   filterType.value = type;
 }
-
-const filteredTasks = computed(() => {
-  if (filterType.value == "done") {
-    return tasks.value.filter((task) => task.complete);
-  } else if (filterType.value == "active") {
-    return tasks.value.filter((task) => !task.complete);
-  } else return tasks.value;
-});
+provide("isDialog", isDialog);
+provide("isEditTask", isEditTask);
+provide("taskTitle", taskTitle);
+provide("saveTask", saveTask);
+provide("closeForm", closeForm);
 </script>
 
 <style lang="scss" scoped>
