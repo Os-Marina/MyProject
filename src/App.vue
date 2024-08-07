@@ -16,6 +16,7 @@
           variant="outlined"
         />
       </div>
+      <MyDialog v-model="isDialog" @saveTask="saveTask" />
       <TodoList
         :tasks="tasks"
         :filterType="filterType"
@@ -23,7 +24,6 @@
         @toggleTask="toggleTask"
         @removeTask="removeTask"
       />
-      <MyDialog v-model="isDialog" />
     </div>
   </v-app>
 </template>
@@ -69,17 +69,16 @@ function editTask(task) {
   isDialog.value = true;
 }
 function saveTask() {
-  if (taskTitle.value) {
-    if (isEditTask.value && currenTaskId.value !== null) {
-      const task = tasks.value.find((t) => t.id === currenTaskId.value);
-      if (task) {
-        task.title = taskTitle.value;
-      }
-    } else addTask();
-    closeForm();
-    localStorage.setItem("tasks", JSON.stringify(tasks.value));
-  }
+  if (isEditTask.value && currenTaskId.value !== null) {
+    const task = tasks.value.find((t) => t.id === currenTaskId.value);
+    if (task) {
+      task.title = taskTitle.value;
+    }
+  } else addTask();
+  closeForm();
+  localStorage.setItem("tasks", JSON.stringify(tasks.value));
 }
+
 function closeForm() {
   isDialog.value = false;
   isEditTask.value = false;
@@ -102,11 +101,6 @@ function removeTask(taskId: number) {
 function setFilterCompleted(type: "active" | "done") {
   filterType.value = type;
 }
-provide("isDialog", isDialog);
-provide("isEditTask", isEditTask);
-provide("taskTitle", taskTitle);
-provide("saveTask", saveTask);
-provide("closeForm", closeForm);
 </script>
 
 <style lang="scss" scoped>
@@ -119,7 +113,6 @@ provide("closeForm", closeForm);
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  // gap: 30px;
   color: rgb(128, 17, 161);
   &__title {
     font-size: 30px;

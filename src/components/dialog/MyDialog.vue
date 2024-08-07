@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="500">
+  <v-dialog v-model="isDialog" max-width="500">
     <v-card class="item-list" style="display: flex; flex-direction: row">
       <v-form class="item-list__task">
         <v-toolbar-title style="margin-bottom: 15px; font-weight: 300">{{
@@ -22,14 +22,49 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from "vue";
+import { ref, watch } from "vue";
 import { isRequired } from "@/helpers/rules";
 
-// const isDialog = inject("isDialog");
-const isEditTask = inject("isEditTask");
-const taskTitle = inject("taskTitle");
-const saveTask = inject("saveTask");
-const closeForm = inject("closeForm");
+// import type { Task } from "@/type";
+// const isDialog = ref(false);
+// const tasks = ref([] as Task[]);
+// const currenTaskId = ref(null);
+
+const isEditTask = ref(false);
+const taskTitle = ref("");
+const props = defineProps({
+  modelValue: Boolean,
+  task: Object,
+  onUpdateModelValue: Function,
+});
+let id = 0;
+const isDialog = ref(props.modelValue);
+const emit = defineEmits(["closeForm", "saveTask", "update:modelValue"]);
+
+const closeForm = () => {
+  emit("update:modelValue", false);
+};
+const saveTask = () => {
+  if (taskTitle.value) {
+    const task = {
+      title: taskTitle.value,
+      complete: props.task ? props.task.complete : false,
+      id: props.task ? props.task.id : id++,
+    };
+    emit("saveTask", task);
+    emit("update:modelValue", false);
+  }
+};
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    isDialog.value = newVal;
+    if (!newVal) {
+      taskTitle.value = "";
+    }
+  }
+);
 </script>
 
 <style lang="scss" scoped>
