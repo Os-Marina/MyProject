@@ -22,49 +22,51 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import { isRequired } from "@/helpers/rules";
+import { ref, watch } from "vue"
+import { isRequired } from "@/helpers/rules"
 
 // import type { Task } from "@/type";
 // const isDialog = ref(false);
 // const tasks = ref([] as Task[]);
 // const currenTaskId = ref(null);
 
-const isEditTask = ref(false);
-const taskTitle = ref("");
+const isEditTask = ref(false)
+const taskTitle = ref("")
 const props = defineProps({
   modelValue: Boolean,
   task: Object,
   onUpdateModelValue: Function,
-});
-let id = 0;
-const isDialog = ref(props.modelValue);
-const emit = defineEmits(["closeForm", "saveTask", "update:modelValue"]);
+})
+let id = 0
+const isDialog = ref(props.modelValue)
+const emit = defineEmits(["closeForm", "saveTask", "update:modelValue"])
 
 const closeForm = () => {
-  emit("update:modelValue", false);
-};
+  emit("update:modelValue", false)
+}
 const saveTask = () => {
   if (taskTitle.value) {
     const task = {
       title: taskTitle.value,
       complete: props.task ? props.task.complete : false,
       id: props.task ? props.task.id : id++,
-    };
-    emit("saveTask", task);
-    emit("update:modelValue", false);
+    }
+    console.log("saveTask", task)
+
+    emit("saveTask", task)
+    emit("update:modelValue", false)
   }
-};
+}
 
 watch(
   () => props.modelValue,
   (newVal) => {
-    isDialog.value = newVal;
+    isDialog.value = newVal
     if (!newVal) {
-      taskTitle.value = "";
+      taskTitle.value = ""
     }
   }
-);
+)
 </script>
 
 <style lang="scss" scoped>
