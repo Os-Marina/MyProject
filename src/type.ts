@@ -3,7 +3,3 @@ export interface Task {
   complete: boolean;
   id: number;
 }
-
-export interface IProps {
-  modelValue: boolean;
-}

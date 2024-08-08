@@ -43,9 +43,14 @@ import { computed } from "vue";
 const props = defineProps({
   tasks: Array,
   filterType: String,
+  onUpdateModelValue: Function,
 });
 
 const emit = defineEmits(["editTask", "toggleTask", "removeTask"]);
+// const isEditTask = ref(props.modelValue);
+// const isDialog = ref(props.modelValue);
+// const currenTaskId = ref("");
+// const taskTitle = ref("");
 
 const filteredTasks = computed(() => {
   if (props.filterType === "all") {

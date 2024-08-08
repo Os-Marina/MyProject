@@ -16,7 +16,6 @@
           variant="outlined"
         />
       </div>
-      <MyDialog v-model="isDialog" @saveTask="saveTask" />
       <TodoList
         :tasks="tasks"
         :filterType="filterType"
@@ -24,88 +23,97 @@
         @toggleTask="toggleTask"
         @removeTask="removeTask"
       />
+      <MyDialog
+        v-model="isDialog"
+        :task="task"
+        :isEditTask="isEditTask"
+        @saveTask="saveTask"
+      />
     </div>
   </v-app>
 </template>
 
 <script setup lang="ts">
-// import { isRequired } from "./helpers/rules";
-import { ref, onMounted, provide } from "vue"
-import TodoList from "./components/list/TodoList.vue"
-import MyDialog from "./components/dialog/MyDialog.vue"
-import type { Task } from "@/type"
+import { ref, onMounted } from "vue";
+import MyDialog from "./components/dialog/MyDialog.vue";
+import TodoList from "./components/list/TodoList.vue";
+import type { Task } from "@/type";
 
-let id = 0
-const isDialog = ref(false)
-const isEditTask = ref(false)
-const tasks = ref([] as Task[])
-const taskTitle = ref("")
-const filterType = ref<"all" | "active" | "done">("all")
-const currenTaskId = ref(null)
+let id = 0;
+const isDialog = ref(false);
+const isEditTask = ref(false);
+const tasks = ref([] as Task[]);
+const taskTitle = ref("");
+const filterType = ref<"all" | "active" | "done">("all");
+const currenTaskId = ref(0);
 
 onMounted(() => {
-  const storedTasks = localStorage.getItem("tasks")
+  const storedTasks = localStorage.getItem("tasks");
   if (storedTasks) {
-    tasks.value = JSON.parse(storedTasks)
+    tasks.value = JSON.parse(storedTasks);
   }
-})
+});
 
 function addTask(newTitle) {
-  console.log("addTask", taskTitle.value)
-  taskTitle.value = newTitle
+  console.log("addTask", taskTitle.value);
+  taskTitle.value = newTitle;
   if (taskTitle.value) {
     tasks.value.unshift({
       title: taskTitle.value,
       complete: false,
       id: id++,
-    })
-    taskTitle.value = ""
-    isDialog.value = false
+    });
+    taskTitle.value = "";
+    isDialog.value = false;
   }
 }
 
-function editTask(task) {
-  taskTitle.value = task.title
-  currenTaskId.value = task.id
-  isEditTask.value = true
-  isDialog.value = true
+function editTask(task: Task) {
+  isDialog.value = true;
+  isEditTask.value = true;
+  currenTaskId.value = task.id;
+  taskTitle.value = task.title;
+
+  console.log(taskTitle.value);
 }
-function saveTask(task) {
-  console.log("saveTask")
 
-  if (isEditTask.value && currenTaskId.value !== null) {
-    console.log("here")
-
-    const task = tasks.value.find((t) => t.id === currenTaskId.value)
-    if (task) {
-      task.title = taskTitle.value
+function saveTask(task: Task) {
+  // console.log(taskTitle.value);
+  if (taskTitle.value) {
+    if (isEditTask.value && currenTaskId.value !== null) {
+      console.log("here");
+      const task = tasks.value.find((t) => t.id === currenTaskId.value);
+      if (task) {
+        task.title = taskTitle.value;
+        console.log(task.title);
+      }
     }
-  } else addTask(task.title)
-  closeForm()
-  localStorage.setItem("tasks", JSON.stringify(tasks.value))
+  } else addTask(task.title);
+  closeForm();
+  localStorage.setItem("tasks", JSON.stringify(tasks.value));
 }
 
 function closeForm() {
-  isDialog.value = false
-  isEditTask.value = false
-  taskTitle.value = ""
-  currenTaskId.value = null
+  isDialog.value = false;
+  isEditTask.value = false;
+  taskTitle.value = "";
+  currenTaskId.value = 0;
 }
 
 function toggleTask(taskId: number) {
-  const task = tasks.value.find((task) => task.id === taskId)
+  const task = tasks.value.find((task) => task.id === taskId);
   if (task) {
-    task.complete = !task.complete
-    localStorage.setItem("tasks", JSON.stringify(tasks.value))
+    task.complete = !task.complete;
+    localStorage.setItem("tasks", JSON.stringify(tasks.value));
   }
 }
 
 function removeTask(taskId: number) {
-  tasks.value = tasks.value.filter((task) => task.id !== taskId)
-  localStorage.setItem("tasks", JSON.stringify(tasks.value))
+  tasks.value = tasks.value.filter((task) => task.id !== taskId);
+  localStorage.setItem("tasks", JSON.stringify(tasks.value));
 }
 function setFilterCompleted(type: "active" | "done") {
-  filterType.value = type
+  filterType.value = type;
 }
 </script>
 

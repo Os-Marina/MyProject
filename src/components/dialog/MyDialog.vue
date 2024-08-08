@@ -1,6 +1,6 @@
 <template>
-  <v-dialog v-model="isDialog" max-width="500">
-    <v-card class="item-list" style="display: flex; flex-direction: row">
+  <v-dialog :model-value="isDialog" max-width="500">
+    <v-card class="item-list">
       <v-form class="item-list__task">
         <v-toolbar-title style="margin-bottom: 15px; font-weight: 300">{{
           isEditTask ? "Редактирование задачи" : "Добавление задачи"
@@ -22,55 +22,50 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue"
-import { isRequired } from "@/helpers/rules"
+import { ref, watch, computed } from "vue";
+import { isRequired } from "@/helpers/rules";
+import type { IProps, IEmits } from "./types";
 
-// import type { Task } from "@/type";
-// const isDialog = ref(false);
-// const tasks = ref([] as Task[]);
-// const currenTaskId = ref(null);
+const isEditTask = ref(false);
 
-const isEditTask = ref(false)
-const taskTitle = ref("")
-const props = defineProps({
-  modelValue: Boolean,
-  task: Object,
-  onUpdateModelValue: Function,
-})
-let id = 0
-const isDialog = ref(props.modelValue)
-const emit = defineEmits(["closeForm", "saveTask", "update:modelValue"])
+const props = defineProps<IProps>();
+const emit = defineEmits<IEmits>();
+const isDialog = computed(() => props.modelValue);
+// const isDialog = ref(props.modelValue); //computed
+// const taskTitle = ref(props.task ? props.task.title : ""); // это должно поступать из родителя через props
 
 const closeForm = () => {
-  emit("update:modelValue", false)
-}
+  emit("update:modelValue", false);
+};
 const saveTask = () => {
-  if (taskTitle.value) {
+  if (props.task.title) {
     const task = {
-      title: taskTitle.value,
+      title: props.task.title,
       complete: props.task ? props.task.complete : false,
       id: props.task ? props.task.id : id++,
-    }
-    console.log("saveTask", task)
+    };
+    console.log("saveTask", task);
 
-    emit("saveTask", task)
-    emit("update:modelValue", false)
+    emit("saveTask", task);
+    emit("update:modelValue", false);
   }
-}
+};
 
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    isDialog.value = newVal
-    if (!newVal) {
-      taskTitle.value = ""
-    }
-  }
-)
+// watch(
+//   () => props.modelValue,
+//   (newVal) => {
+//     isDialog.value = newVal;
+//     if (!newVal) {
+//       taskTitle.value = "";
+//     }
+//   }
+// );
 </script>
 
 <style lang="scss" scoped>
 .item-list {
+  display: flex;
+  flex-direction: row;
   width: 100%;
   border: 1px solid;
   border-radius: 15px;
