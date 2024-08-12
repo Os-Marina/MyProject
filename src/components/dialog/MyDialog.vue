@@ -3,11 +3,11 @@
     <v-card class="item-list">
       <v-form class="item-list__task">
         <v-toolbar-title style="margin-bottom: 15px; font-weight: 300">{{
-          isEditTask ? "Редактирование задачи" : "Добавление задачи"
+          props.isEditTask ? "Редактирование задачи" : "Добавление задачи"
         }}</v-toolbar-title>
         <v-text-field
+          v-model="localTitle"
           autofocus
-          v-model="taskTitle"
           class="item-list__text"
           :rules="[isRequired]"
           label="Введите заметку..."
@@ -22,33 +22,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { isRequired } from "@/helpers/rules";
-import type { IProps, IEmits } from "./types";
+import type { IProps, IEmits, Task } from "./types";
 
-const isEditTask = ref(false);
+// const isEditTask = ref(false);
 
 const props = defineProps<IProps>();
 const emit = defineEmits<IEmits>();
 const isDialog = computed(() => props.modelValue);
+const isEditTask = computed(() => props.modelValue);
+const localTitle = ref("");
+// const isEditTask = computed(() => props.modelValue);
 // const isDialog = ref(props.modelValue); //computed
 // const taskTitle = ref(props.task ? props.task.title : ""); // это должно поступать из родителя через props
 
-const closeForm = () => {
-  emit("update:modelValue", false);
+const closeForm = (isClose: boolean) => {
+  emit("closeForm", isClose);
 };
-const saveTask = () => {
-  if (props.task.title) {
-    const task = {
-      title: props.task.title,
-      complete: props.task ? props.task.complete : false,
-      id: props.task ? props.task.id : id++,
-    };
-    console.log("saveTask", task);
+onMounted(() => console.log(props, "монтируется"));
 
-    emit("saveTask", task);
-    emit("update:modelValue", false);
-  }
+const saveTask = () => {
+  console.log("saveTask", localTitle.value);
+  const task = {
+    title: localTitle.value,
+    complete: false,
+    id: props.isEditTask
+      ? props.currenTaskId
+      : props.tasks.length > 0
+      ? props.tasks[props.tasks.length - 1].id + 1
+      : 0,
+  };
+  console.log("saveTask", task);
+  emit("saveTask", task);
+  emit("update:modelValue", false);
 };
 
 // watch(

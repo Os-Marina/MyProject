@@ -7,7 +7,7 @@
         class="card__items"
       >
         <div class="card__text" :class="[{ completeTask: task.complete }]">
-          {{ task.title }}
+          {{ task }}
         </div>
         <div class="card__btns">
           <v-btn
@@ -37,16 +37,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from "vue";
+// import type { IProps, IEmits } from "./types";
+import type { IProps, IEmits, Task } from "./types";
 
-const props = defineProps({
-  tasks: Array,
-  filterType: String,
-  onUpdateModelValue: Function,
-});
-
-const emit = defineEmits(["editTask", "toggleTask", "removeTask"]);
+const props = defineProps<IProps>();
+const emit = defineEmits<IEmits>();
 // const isEditTask = ref(props.modelValue);
 // const isDialog = ref(props.modelValue);
 // const currenTaskId = ref("");
@@ -65,15 +62,15 @@ const filteredTasks = computed(() => {
   return props.tasks;
 });
 
-const editTask = (task) => {
+const editTask = (task: Task) => {
   emit("editTask", task);
 };
 
-const toggleTask = (taskId) => {
+const toggleTask = (taskId: number) => {
   emit("toggleTask", taskId);
 };
 
-const removeTask = (taskId) => {
+const removeTask = (taskId: number) => {
   emit("removeTask", taskId);
 };
 </script>

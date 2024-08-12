@@ -6,11 +6,13 @@ export interface Task {
 
 export interface IProps {
   modelValue: boolean;
-  task: Task;
+  tasks: Task[];
+  isEditTask: boolean;
+  currenTaskId: number;
 }
 
 export interface IEmits {
-  (e: "saveTask", data: Task): void;
+  (e: "saveTask", tasks: Task[]): void;
   (e: "closeForm", value: boolean): void;
   (e: "update:modelValue", value: boolean): void;
 }

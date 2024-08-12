@@ -24,10 +24,13 @@
         @removeTask="removeTask"
       />
       <MyDialog
+        v-if="isDialog"
         v-model="isDialog"
-        :task="task"
+        :tasks="tasks"
         :isEditTask="isEditTask"
+        :currenTaskId="currenTaskId"
         @saveTask="saveTask"
+        @update:model-value="closeForm"
       />
     </div>
   </v-app>
@@ -42,7 +45,7 @@ import type { Task } from "@/type";
 let id = 0;
 const isDialog = ref(false);
 const isEditTask = ref(false);
-const tasks = ref([] as Task[]);
+const tasks = ref<Task[]>([]);
 const taskTitle = ref("");
 const filterType = ref<"all" | "active" | "done">("all");
 const currenTaskId = ref(0);
@@ -54,51 +57,57 @@ onMounted(() => {
   }
 });
 
-function addTask(newTitle) {
-  console.log("addTask", taskTitle.value);
-  taskTitle.value = newTitle;
-  if (taskTitle.value) {
-    tasks.value.unshift({
-      title: taskTitle.value,
-      complete: false,
-      id: id++,
-    });
-    taskTitle.value = "";
-    isDialog.value = false;
-  }
-}
+// function addTask() {
+//   console.log("addTask", taskTitle.value);
+//   // taskTitle.value = newTitle;
+//   if (taskTitle.value) {
+//     tasks.value.unshift({
+//       title: taskTitle.value,
+//       complete: false,
+//       id: id++,
+//     });
+//     taskTitle.value = "";
+//     isDialog.value = false;
+//     console.log("addTask", taskTitle.value);
+//   }
+// }
 
 function editTask(task: Task) {
   isDialog.value = true;
   isEditTask.value = true;
   currenTaskId.value = task.id;
   taskTitle.value = task.title;
-
-  console.log(taskTitle.value);
 }
-
-function saveTask(task: Task) {
-  // console.log(taskTitle.value);
+const closeForm = (isOpen?: boolean) => {
+  if (!isOpen) {
+    isDialog.value = false;
+    isEditTask.value = false;
+    taskTitle.value = "";
+    currenTaskId.value = 0;
+  }
+};
+const saveTask = (task) => {
+  console.log("saveTask", task);
   if (taskTitle.value) {
     if (isEditTask.value && currenTaskId.value !== null) {
       console.log("here");
       const task = tasks.value.find((t) => t.id === currenTaskId.value);
       if (task) {
         task.title = taskTitle.value;
-        console.log(task.title);
+        console.log(task);
       }
     }
-  } else addTask(task.title);
+  } else {
+    tasks.value.unshift({
+      title: taskTitle.value,
+      complete: false,
+      id: id++,
+    });
+    console.log(tasks.value);
+  }
   closeForm();
   localStorage.setItem("tasks", JSON.stringify(tasks.value));
-}
-
-function closeForm() {
-  isDialog.value = false;
-  isEditTask.value = false;
-  taskTitle.value = "";
-  currenTaskId.value = 0;
-}
+};
 
 function toggleTask(taskId: number) {
   const task = tasks.value.find((task) => task.id === taskId);
